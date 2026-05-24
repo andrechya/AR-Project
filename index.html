@@ -269,13 +269,14 @@
       animation: rotate 1s linear infinite;
     }
 
-    /* PLANET INFO CARD (Left Side Panel) */
+    /* PLANET INFO CARD (Bottom Center Panel) */
     .planet-card-container {
       position: absolute;
-      left: 24px;
+      left: 50%;
       bottom: 24px;
-      top: 100px; /* Space under header */
-      width: 460px; /* Generous width for desktop */
+      transform: translateX(-50%);
+      width: calc(100% - 48px); /* Padding on screen edges */
+      max-width: 680px; /* Spacious wide card */
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
@@ -291,9 +292,9 @@
       border-radius: 20px;
       padding: 24px;
       box-shadow: 0 15px 45px rgba(0,0,0,0.6), inset 0 0 20px rgba(0, 240, 255, 0.1);
-      transform: translateX(-120%); /* Slide in from left */
+      transform: translateY(120%); /* Slide in from bottom */
       opacity: 0;
-      transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+      transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1), padding 0.4s ease;
       pointer-events: auto;
       position: relative;
       overflow: hidden;
@@ -303,8 +304,13 @@
     }
 
     .planet-card.active {
-      transform: translateX(0);
+      transform: translateY(0);
       opacity: 1;
+    }
+
+    .planet-card.minimized {
+      padding-top: 14px;
+      padding-bottom: 14px;
     }
 
     .planet-card::before {
@@ -320,10 +326,18 @@
     .planet-header {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
+      align-items: center;
       margin-bottom: 12px;
       border-bottom: 1px solid rgba(255,255,255,0.1);
       padding-bottom: 8px;
+      cursor: pointer;
+      transition: margin 0.4s ease, border-color 0.4s ease;
+    }
+
+    .planet-card.minimized .planet-header {
+      margin-bottom: 0;
+      border-bottom-color: transparent;
+      padding-bottom: 0;
     }
 
     .planet-title {
@@ -355,8 +369,57 @@
       color: rgba(255,255,255,0.85);
       margin-bottom: 16px;
       overflow-y: auto;
-      max-height: 160px; /* Taller height on desktop */
+      max-height: 160px;
       padding-right: 6px;
+    }
+
+    .planet-desc, .specs-grid {
+      transition: max-height 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.3s ease, margin 0.4s ease, padding 0.4s ease;
+      max-height: 250px;
+      opacity: 1;
+    }
+
+    .planet-card.minimized .planet-desc {
+      max-height: 0 !important;
+      opacity: 0 !important;
+      margin-bottom: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      pointer-events: none;
+    }
+
+    .planet-card.minimized .specs-grid {
+      max-height: 0 !important;
+      opacity: 0 !important;
+      margin-bottom: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      pointer-events: none;
+    }
+
+    /* Minimize Sci-Fi Button */
+    .btn-minimize {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+    }
+
+    .btn-minimize:hover {
+      background: rgba(0, 240, 255, 0.15);
+      color: #fff;
+    }
+
+    .planet-card.minimized .btn-minimize {
+      transform: rotate(-180deg); /* Flip arrow upwards */
     }
 
     /* Gaya Scrollbar Neon Kustom untuk Deskripsi */
@@ -641,6 +704,7 @@
         bottom: 12px;
         top: auto;
         width: calc(100% - 24px);
+        transform: none !important;
         justify-content: center;
       }
       .specs-grid {
@@ -786,16 +850,17 @@
         <div class="scanner-radar"></div>
         <span>MENCARI MARKER...</span>
       </div>
-    </div>
-
-    <!-- Interactive Info Cards -->
+     <!-- Interactive Info Cards -->
     <div class="planet-card-container">
       
       <!-- Earth Card -->
       <div class="planet-card" id="card-earth">
-        <div class="planet-header">
-          <div class="planet-title">Bumi (Earth)</div>
-          <div class="planet-tag">Marker Hiro</div>
+        <div class="planet-header" onclick="toggleMinimize(event)">
+          <div style="display: flex; align-items: baseline; gap: 10px;">
+            <div class="planet-title">Bumi (Earth)</div>
+            <div class="planet-tag">Marker Hiro</div>
+          </div>
+          <button class="btn-minimize" aria-label="Minimize Card">▼</button>
         </div>
         <div class="planet-desc">
           Bumi (Earth) adalah planet ketiga dari Matahari dan satu-satunya tempat di alam semesta yang terbukti mendukung kehidupan. Keunikannya didukung oleh keberadaan cairan air stabil di permukaan, atmosfer tebal kaya Nitrogen (78%) &amp; Oksigen (21%), lempeng tektonik aktif yang mendaur ulang karbon, serta medan magnet kuat yang melindungi biosfer dari radiasi kosmik matahari.
@@ -822,9 +887,12 @@
 
       <!-- Mars Card -->
       <div class="planet-card" id="card-mars">
-        <div class="planet-header">
-          <div class="planet-title">Mars</div>
-          <div class="planet-tag">Marker Kanji</div>
+        <div class="planet-header" onclick="toggleMinimize(event)">
+          <div style="display: flex; align-items: baseline; gap: 10px;">
+            <div class="planet-title">Mars</div>
+            <div class="planet-tag">Marker Kanji</div>
+          </div>
+          <button class="btn-minimize" aria-label="Minimize Card">▼</button>
         </div>
         <div class="planet-desc">
           Mars (Planet Merah) adalah planet terestrial dingin dengan atmosfer tipis berbasis CO₂. Warna kemerahan permukaannya berasal dari karat besi oksida. Mars menyimpan rahasia sejarah air kuno melalui saluran sungai mati dan tudung es kutub, serta memiliki fitur ekstrem seperti gunung berapi terbesar (Olympus Mons) dan lembah terdalam (Valles Marineris) di Tata Surya.
@@ -851,9 +919,12 @@
 
       <!-- Jupiter Card -->
       <div class="planet-card" id="card-jupiter">
-        <div class="planet-header">
-          <div class="planet-title">Jupiter</div>
-          <div class="planet-tag">Barcode 0</div>
+        <div class="planet-header" onclick="toggleMinimize(event)">
+          <div style="display: flex; align-items: baseline; gap: 10px;">
+            <div class="planet-title">Jupiter</div>
+            <div class="planet-tag">Barcode 0</div>
+          </div>
+          <button class="btn-minimize" aria-label="Minimize Card">▼</button>
         </div>
         <div class="planet-desc">
           Jupiter adalah raksasa gas terbesar di Tata Surya dengan massa 318 kali lipat Bumi. Planet ini didominasi gas Hidrogen dan Helium tanpa permukaan padat yang jelas. Atmosfer luarnya mengalami turbulensi hebat dengan badai legendaris "Bintik Merah Besar" yang berusia ratusan tahun, dikelilingi oleh cincin tipis dan puluhan satelit pengorbit (seperti Europa yang memiliki samudra bawah es).
@@ -880,9 +951,12 @@
 
       <!-- Saturnus Card -->
       <div class="planet-card" id="card-saturn">
-        <div class="planet-header">
-          <div class="planet-title">Saturnus (Saturn)</div>
-          <div class="planet-tag">Barcode 1</div>
+        <div class="planet-header" onclick="toggleMinimize(event)">
+          <div style="display: flex; align-items: baseline; gap: 10px;">
+            <div class="planet-title">Saturnus (Saturn)</div>
+            <div class="planet-tag">Barcode 1</div>
+          </div>
+          <button class="btn-minimize" aria-label="Minimize Card">▼</button>
         </div>
         <div class="planet-desc">
           Saturnus adalah planet keenam dari Matahari dan terbesar kedua di Tata Surya. Dikenal sebagai raksasa gas yang paling menakjubkan karena sistem cincin esnya yang sangat megah dan kompleks. Atmosfernya terdiri atas Hidrogen dan Helium, dan memiliki kerapatan yang sangat rendah (bahkan lebih ringan dari air) serta dikelilingi oleh 146 satelit alami termasuk Titan yang tebal atmosfernya.
@@ -909,9 +983,12 @@
 
       <!-- Matahari Card -->
       <div class="planet-card" id="card-sun">
-        <div class="planet-header">
-          <div class="planet-title">Matahari (Sun)</div>
-          <div class="planet-tag">Barcode 2</div>
+        <div class="planet-header" onclick="toggleMinimize(event)">
+          <div style="display: flex; align-items: baseline; gap: 10px;">
+            <div class="planet-title">Matahari (Sun)</div>
+            <div class="planet-tag">Barcode 2</div>
+          </div>
+          <button class="btn-minimize" aria-label="Minimize Card">▼</button>
         </div>
         <div class="planet-desc">
           Matahari adalah bintang pusat Tata Surya yang menyumbang 99,86% dari seluruh massa sistem ini. Merupakan bola plasma panas membara yang ditenagai oleh reaksi fusi nuklir hidrogen menjadi helium di intinya. Panas dan cahaya yang dipancarkan Matahari menjadi motor penggerak utama bagi iklim, cuaca, fotosintesis, dan seluruh ekosistem kehidupan di Bumi.
@@ -938,9 +1015,12 @@
 
       <!-- Venus Card -->
       <div class="planet-card" id="card-venus">
-        <div class="planet-header">
-          <div class="planet-title">Venus</div>
-          <div class="planet-tag">Barcode 3</div>
+        <div class="planet-header" onclick="toggleMinimize(event)">
+          <div style="display: flex; align-items: baseline; gap: 10px;">
+            <div class="planet-title">Venus</div>
+            <div class="planet-tag">Barcode 3</div>
+          </div>
+          <button class="btn-minimize" aria-label="Minimize Card">▼</button>
         </div>
         <div class="planet-desc">
           Venus adalah planet kedua dari Matahari dan benda langit paling terang di langit malam setelah Bulan. Sering dijuluki sebagai kembaran Bumi karena kemiripan ukuran dan massanya, namun memiliki lingkungan yang ekstrem dengan efek rumah kaca tak terkendali. Atmosfer tebalnya terbuat dari CO₂ yang memerangkap panas, menjadikannya planet terpanas di Tata Surya dengan suhu permukaan mencapai 475°C, cukup untuk melelehkan timbal.
@@ -1277,7 +1357,16 @@
     function hideAllCards() {
       document.querySelectorAll('.planet-card').forEach(card => {
         card.classList.remove('active');
+        card.classList.remove('minimized');
       });
+    }
+
+    function toggleMinimize(event) {
+      const card = event.currentTarget.closest('.planet-card');
+      if (card) {
+        card.classList.toggle('minimized');
+        if (typeof playClick === 'function') playClick();
+      }
     }
 
     function startScanner() {
