@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Interplanetary WebAR Scanner</title>
+  
+  <!-- A-Frame & AR.js Libraries -->
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  
+  <script>
+    // Komponen A-Frame kustom harus didaftarkan SEBELUM tag <a-scene> diparse oleh browser!
+    AFRAME.registerComponent('marker-handler', {
+      init: function () {
+        const el = this.el;
+        const id = el.id;
+        let planetName = '';
+        
+        if (id === 'marker-earth') planetName = 'earth';
+        else if (id === 'marker-mars') planetName = 'mars';
+        else if (id === 'marker-jupiter') planetName = 'jupiter';
+
+        el.addEventListener('markerFound', () => {
+          activePlanet = planetName;
+          if (typeof playScanSuccess === 'function') playScanSuccess();
+          
+          // Update Top Right Status
+          const statusSpan = document.querySelector('#scannerStatus span');
+          const statusRadar = document.querySelector('.scanner-radar');
+          if (statusSpan) {
+            statusSpan.innerText = `TERKUNCI: ${planetName.toUpperCase()}`;
+            statusSpan.style.color = 'var(--primary)';
+          }
+          if (statusRadar) {
+            statusRadar.style.animationPlayState = 'running';
+            statusRadar.style.borderColor = 'var(--primary)';
+          }
+          
+          // Show Info Card
+          if (typeof hideAllCards === 'function') hideAllCards();
+          const card = document.getElementById(`card-${planetName}`);
+          if (card) card.classList.add('active');
+        });
+
+        el.addEventListener('markerLost', () => {
+          if (activePlanet === planetName) {
+            activePlanet = null;
+            if (typeof playAlert === 'function') playAlert();
+            
+            // Reset Status Panel
+            const statusSpan = document.querySelector('#scannerStatus span');
+            const statusRadar = document.querySelector('.scanner-radar');
+            if (statusSpan) {
+              statusSpan.innerText = 'MENCARI MARKER...';
+              statusSpan.style.color = '#fff';
+            }
+            if (statusRadar) {
+              statusRadar.style.animationPlayState = 'running';
+              statusRadar.style.borderColor = '#fff';
+            }
+            
+            if (typeof hideAllCards === 'function') hideAllCards();
+          }
+        });
+      }
+    });
+  </script>
+  
+  <!-- Google Fonts for Premium Sci-Fi Look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #00f0ff;
+      --secondary: #bd00ff;
+      --bg-glass: rgba(10, 15, 30, 0.7);
+      --border-glass: rgba(0, 240, 255, 0.2);
+      --text: #e2e8f0;
+      --font-sci-fi: 'Orbitron', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: var(--font-body);
+      background-color: #000;
+      color: var(--text);
+    }
+
+    /* Mencegah zoom / crop video background, memaksa contain yang konsisten */
+    video {
+      object-fit: contain !important;
+    }
+
+    /* ================= Sci-Fi HUD HUD (Overlay) ================= */
+    .hud-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+      box-shadow: inset 0 0 80px rgba(0, 240, 255, 0.15);
+      transition: all 0.5s ease;
+    }
+
+    /* Scanlines effect */
+    .hud-overlay::after {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      z-index: 6;
+      background-size: 100% 4px, 6px 100%;
+      opacity: 0.4;
+    }
+
+    /* Sci-Fi Corners */
+    .corner {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--primary);
+      pointer-events: none;
+    }
+    .top-left { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+    .top-right { top: 20px; right: 20px; border-left: none; border-bottom: none; }
+    .bottom-left { bottom: 20px; left: 20px; border-right: none; border-top: none; }
+    .bottom-right { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+
+    /* Interactive UI Wrapper */
+    .interactive-ui {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      padding: 24px;
+      pointer-events: none;
+    }
+
+    /* HEADER */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      pointer-events: auto;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pulse-dot {
+      width: 12px;
+      height: 12px;
+      background-color: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--primary);
+      animation: pulse 1.5s infinite alternate;
+    }
+
+    .logo-text {
+      font-family: var(--font-sci-fi);
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+    }
+
+    /* CONTROL BUTTONS */
+    .controls-panel {
+      display: flex;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .btn-hud {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      color: var(--primary);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: var(--font-sci-fi);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .btn-hud:hover {
+      background: var(--primary);
+      color: #000;
+      border-color: var(--primary);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .btn-hud:active {
+      transform: translateY(1px);
+    }
+
+    /* SCANNER STATS (Top-Right Panel) */
+    .status-panel {
+      position: absolute;
+      top: 80px;
+      right: 24px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 12px 18px;
+      pointer-events: auto;
+      min-width: 180px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    .status-title {
+      font-family: var(--font-sci-fi);
+      font-size: 10px;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .status-value {
+      font-family: var(--font-sci-fi);
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .scanner-radar {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: rotate 1s linear infinite;
+    }
+
+    /* PLANET INFO CARD (Bottom Center) */
+    .planet-card-container {
+      margin-top: auto;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      pointer-events: none;
+    }
+
+    .planet-card {
+      background: rgba(8, 12, 24, 0.85);
+      border: 1px solid var(--border-glass);
+      backdrop-filter: blur(15px);
+      width: 100%;
+      max-width: 500px;
+      border-radius: 20px;
+      padding: 20px 24px;
+      box-shadow: 0 15px 45px rgba(0,0,0,0.6), inset 0 0 20px rgba(0, 240, 255, 0.1);
+      transform: translateY(120%);
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+      pointer-events: auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .planet-card.active {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .planet-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+
+    .planet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 8px;
+    }
+
+    .planet-title {
+      font-family: var(--font-sci-fi);
+      font-size: 24px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #fff 30%, var(--primary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .planet-tag {
+      font-family: var(--font-sci-fi);
+      font-size: 10px;
+      color: var(--primary);
+      letter-spacing: 1px;
+      font-weight: 700;
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .planet-desc {
+      font-size: 13px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 16px;
+    }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .spec-item {
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 2px solid var(--primary);
+      padding: 6px 12px;
+      border-radius: 0 6px 6px 0;
+    }
+
+    .spec-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .spec-val {
+      font-family: var(--font-sci-fi);
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* DEFAULT/INTRO SCREEN */
+    .intro-modal {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(5, 8, 16, 0.95);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(20px);
+      transition: all 0.5s ease;
+    }
+
+    .intro-modal.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .intro-card {
+      background: rgba(10, 16, 32, 0.8);
+      border: 1px solid var(--border-glass);
+      width: 100%;
+      max-width: 480px;
+      border-radius: 24px;
+      padding: 36px;
+      text-align: center;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.8), 0 0 30px rgba(0, 240, 255, 0.2);
+    }
+
+    .intro-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .intro-title {
+      font-family: var(--font-sci-fi);
+      font-size: 22px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+
+    .intro-desc {
+      font-size: 14px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 24px;
+    }
+
+    .marker-grid-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+
+    .marker-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 12px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .marker-badge {
+      background: var(--primary);
+      color: #000;
+      font-family: var(--font-sci-fi);
+      font-weight: 700;
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      min-width: 65px;
+      text-align: center;
+    }
+
+    .marker-details {
+      font-size: 12px;
+      color: rgba(255,255,255,0.9);
+      font-weight: 600;
+    }
+
+    .btn-start {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 14px;
+      font-family: var(--font-sci-fi);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 8px 24px rgba(0, 240, 255, 0.3);
+      transition: all 0.3s;
+    }
+
+    .btn-start:hover {
+      box-shadow: 0 12px 30px rgba(0, 240, 255, 0.5);
+      transform: translateY(-2px);
+    }
+
+    /* HELP MODAL FOR PRINTING MARKERS */
+    .help-modal {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(5, 8, 16, 0.95);
+      z-index: 150;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(15px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s ease;
+    }
+
+    .help-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .help-card {
+      background: rgba(10, 16, 32, 0.95);
+      border: 1px solid var(--border-glass);
+      width: 100%;
+      max-width: 600px;
+      border-radius: 24px;
+      padding: 30px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .help-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .help-title {
+      font-family: var(--font-sci-fi);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .help-close {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .help-body {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .help-marker-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .help-marker-box img {
+      width: 100%;
+      aspect-ratio: 1;
+      background: white;
+      padding: 8px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .help-marker-name {
+      font-family: var(--font-sci-fi);
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .btn-link {
+      background: rgba(0, 240, 255, 0.1);
+      color: var(--primary);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .btn-link:hover {
+      background: var(--primary);
+      color: #000;
+    }
+
+    /* ANIMATIONS */
+    @keyframes pulse {
+      0% { box-shadow: 0 0 6px var(--primary); opacity: 0.7; }
+      100% { box-shadow: 0 0 16px var(--primary); opacity: 1; }
+    }
+
+    @keyframes rotate {
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .help-body {
+        grid-template-columns: 1fr;
+      }
+      .planet-card {
+        padding: 16px;
+      }
+      .status-panel {
+        top: auto;
+        bottom: 230px;
+        right: 24px;
+        left: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+
+<body style="margin: 0; overflow: hidden;">
+
+  <!-- ================= WELCOME INTRO MODAL ================= -->
+  <div class="intro-modal" id="introModal">
+    <div class="intro-card">
+      <div class="intro-icon">🌌</div>
+      <h1 class="intro-title">AR SPACE SCANNER</h1>
+      <p class="intro-desc">
+        Selamat datang di pemindai planet Augmented Reality interaktif. Arahkan kamera Anda ke penanda (markers) yang disiapkan di bawah untuk menghidupkan objek 3D kosmik dengan visual premium dan orbital dinamis.
+      </p>
+
+      <div class="marker-grid-list">
+        <div class="marker-item">
+          <span class="marker-badge">HIRO</span>
+          <span class="marker-details">Bumi &amp; Bulan (Animasi Orbit)</span>
+        </div>
+        <div class="marker-item">
+          <span class="marker-badge">KANJI</span>
+          <span class="marker-details">Mars &amp; Satelit Phobos/Deimos</span>
+        </div>
+        <div class="marker-item">
+          <span class="marker-badge">BARCODE 0</span>
+          <span class="marker-details">Jupiter &amp; Cincin Raksasa Gas</span>
+        </div>
+      </div>
+
+      <button class="btn-start" onclick="startScanner()">AKTIFKAN PEMINDAI</button>
+    </div>
+  </div>
+
+  <!-- ================= HELP/PRINT MODAL ================= -->
+  <div class="help-modal" id="helpModal">
+    <div class="help-card">
+      <div class="help-header">
+        <h2 class="help-title">PANDUAN PENANDA (MARKER)</h2>
+        <button class="help-close" onclick="toggleHelpModal()">&times;</button>
+      </div>
+      <p style="font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 20px;">
+        Anda dapat mencetak atau menampilkan penanda berikut di layar gawai/laptop lain untuk dipindai oleh kamera Anda:
+      </p>
+      
+      <div class="help-body">
+        <div class="help-marker-box">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/4/48/Hiro_marker_ARjs.png" alt="Hiro Marker">
+          <div class="help-marker-name">Hiro Marker (Bumi)</div>
+          <a class="btn-link" href="https://upload.wikimedia.org/wikipedia/commons/4/48/Hiro_marker_ARjs.png" target="_blank">Unduh Gambar</a>
+        </div>
+        
+        <div class="help-marker-box">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/8d/Kanji_marker_ARjs.png" alt="Kanji Marker">
+          <div class="help-marker-name">Kanji Marker (Mars)</div>
+          <a class="btn-link" href="https://upload.wikimedia.org/wikipedia/commons/8/8d/Kanji_marker_ARjs.png" target="_blank">Unduh Gambar</a>
+        </div>
+
+        <div class="help-marker-box">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://github.com/nicolocarpignoli/artoolkit-barcode-generator/raw/master/barcodes/3x3/matrix/matrix-0.png" alt="Barcode 0">
+          <div class="help-marker-name">Barcode 0 (Jupiter)</div>
+          <a class="btn-link" href="https://github.com/nicolocarpignoli/artoolkit-barcode-generator/raw/master/barcodes/3x3/matrix/matrix-0.png" target="_blank">Unduh Gambar</a>
+        </div>
+      </div>
+      
+      <button class="btn-start" onclick="toggleHelpModal()">TUTUP PANDUAN</button>
+    </div>
+  </div>
+
+  <!-- ================= Sci-Fi Overlay & Interactive UI ================= -->
+  <div class="hud-overlay" id="hudOverlay">
+    <div class="corner top-left"></div>
+    <div class="corner top-right"></div>
+    <div class="corner bottom-left"></div>
+    <div class="corner bottom-right"></div>
+  </div>
+
+  <div class="interactive-ui">
+    <!-- Header -->
+    <div class="header-bar">
+      <div class="logo-container">
+        <div class="pulse-dot"></div>
+        <div class="logo-text">AR Cosmic Scanner</div>
+      </div>
+      <div class="controls-panel">
+        <button class="btn-hud" onclick="toggleHelpModal(); playClick();">📖 Panduan</button>
+        <button class="btn-hud" onclick="toggleRotation(); playClick();">🔄 Putar: ON</button>
+        <button class="btn-hud" onclick="toggleSpeed(); playClick();">⚡ Fast Mode</button>
+      </div>
+    </div>
+
+    <!-- Active Scanner Status -->
+    <div class="status-panel">
+      <div class="status-title">Status Deteksi</div>
+      <div class="status-value" id="scannerStatus">
+        <div class="scanner-radar"></div>
+        <span>MENCARI MARKER...</span>
+      </div>
+    </div>
+
+    <!-- Interactive Info Cards -->
+    <div class="planet-card-container">
+      
+      <!-- Earth Card -->
+      <div class="planet-card" id="card-earth">
+        <div class="planet-header">
+          <div class="planet-title">Bumi (Earth)</div>
+          <div class="planet-tag">Marker Hiro</div>
+        </div>
+        <div class="planet-desc">
+          Bumi adalah planet ketiga dari Matahari, satu-satunya benda astronomi yang diketahui menampung kehidupan. Planet ini memiliki atmosfer yang kaya oksigen dan samudera air cair yang luas.
+        </div>
+        <div class="specs-grid">
+          <div class="spec-item">
+            <div class="spec-label">Diameter</div>
+            <div class="spec-val">12,742 km</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Rotasi</div>
+            <div class="spec-val">24 Jam</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Satelit Alami</div>
+            <div class="spec-val">1 (Luna)</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Suhu Rata-rata</div>
+            <div class="spec-val">15°C</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mars Card -->
+      <div class="planet-card" id="card-mars">
+        <div class="planet-header">
+          <div class="planet-title">Mars</div>
+          <div class="planet-tag">Marker Kanji</div>
+        </div>
+        <div class="planet-desc">
+          Sering disebut 'Planet Merah' karena besi oksida di permukaannya memberikan tampilan kemerahan yang khas. Mars memiliki gunung berapi terbesar (Olympus Mons) di Tata Surya.
+        </div>
+        <div class="specs-grid">
+          <div class="spec-item">
+            <div class="spec-label">Diameter</div>
+            <div class="spec-val">6,779 km</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Rotasi</div>
+            <div class="spec-val">24 Jam 37 Menit</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Satelit Alami</div>
+            <div class="spec-val">2 (Phobos, Deimos)</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Suhu Rata-rata</div>
+            <div class="spec-val">-62°C</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Jupiter Card -->
+      <div class="planet-card" id="card-jupiter">
+        <div class="planet-header">
+          <div class="planet-title">Jupiter</div>
+          <div class="planet-tag">Barcode 0</div>
+        </div>
+        <div class="planet-desc">
+          Raksasa gas terbesar di tata surya kita, memiliki massa dua kali lipat dari gabungan semua planet lain. Memiliki badai ikonik "Bintik Merah Besar" yang lebih besar dari diameter Bumi.
+        </div>
+        <div class="specs-grid">
+          <div class="spec-item">
+            <div class="spec-label">Diameter</div>
+            <div class="spec-val">139,820 km</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Rotasi</div>
+            <div class="spec-val">9 Jam 56 Menit</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Cincin Planeter</div>
+            <div class="spec-val">Ya (Sistem Tipis)</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Satelit Alami</div>
+            <div class="spec-val">95 Dikonfirmasi</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= 3D A-Scene ================= -->
+  <!-- detetionMode: mono_and_matrix dan matrixCodeType: 3x3 mendukung barcode tracking -->
+  <a-scene 
+    embedded 
+    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+    vr-mode-ui="enabled: false">
+    
+    <!-- Custom Space Lighting Rig untuk efek Shading 3D Realistis (Dimensional Shadowing) -->
+    <a-entity light="type: ambient; color: #223344; intensity: 1.8;"></a-entity>
+    <a-entity light="type: directional; color: #ffffff; intensity: 2.8; castShadow: true;" position="-3 5 4"></a-entity>
+
+    <!-- EARTH MARKER (HIRO) -->
+    <a-marker preset="hiro" id="marker-earth" marker-handler>
+      <!-- Earth Container -->
+      <a-entity id="earth-container">
+        <!-- Earth Sphere -->
+        <a-sphere 
+          id="earth-mesh" 
+          position="0 0.5 0" 
+          radius="0.5" 
+          material="src: https://raw.githubusercontent.com/aframevr/sample-assets/master/assets/images/space/earth_atmos_2048.jpg; roughness: 0.8; metalness: 0.1;" 
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 12000; easing: linear; id: earth-rot">
+          
+          <!-- Orbit Bulan (Luna) -->
+          <a-entity animation="property: rotation; to: 0 360 0; loop: true; dur: 6000; easing: linear; id: moon-orbit">
+            <!-- Bola Bulan (Satelit Bumi) -->
+            <a-sphere 
+              position="0.9 0 0" 
+              radius="0.12" 
+              material="color: #cccccc; roughness: 0.9;" 
+              animation="property: rotation; to: 0 360 0; loop: true; dur: 2000; easing: linear; id: moon-rot">
+            </a-sphere>
+          </a-entity>
+          
+        </a-sphere>
+      </a-entity>
+    </a-marker>
+
+    <!-- MARS MARKER (KANJI) -->
+    <a-marker preset="kanji" id="marker-mars" marker-handler>
+      <!-- Mars Container -->
+      <a-entity id="mars-container">
+        <!-- Mars Sphere -->
+        <a-sphere 
+          id="mars-mesh" 
+          position="0 0.5 0" 
+          radius="0.45" 
+          material="src: https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/mars_1k_color.jpg; roughness: 0.9; metalness: 0.1;" 
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 12000; easing: linear; id: mars-rot">
+          
+          <!-- Phobos Orbit -->
+          <a-entity animation="property: rotation; to: 0 360 0; loop: true; dur: 4500; easing: linear; id: phobos-orbit">
+            <a-sphere position="0.75 0.1 0" radius="0.055" material="color: #8c7e7a; roughness: 0.95;"></a-sphere>
+          </a-entity>
+          
+          <!-- Deimos Orbit (Arah berlawanan untuk dinamisme visual) -->
+          <a-entity animation="property: rotation; to: 0 -360 0; loop: true; dur: 8000; easing: linear; id: deimos-orbit">
+            <a-sphere position="0.95 -0.1 0" radius="0.04" material="color: #6e6461; roughness: 0.95;"></a-sphere>
+          </a-entity>
+
+        </a-sphere>
+      </a-entity>
+    </a-marker>
+
+    <!-- JUPITER MARKER (BARCODE 0) -->
+    <a-marker type="barcode" value="0" id="marker-jupiter" marker-handler>
+      <!-- Jupiter Container -->
+      <a-entity id="jupiter-container">
+        <!-- Jupiter Sphere -->
+        <a-sphere 
+          id="jupiter-mesh" 
+          position="0 0.5 0" 
+          radius="0.65" 
+          material="src: https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/jupiter.jpg; roughness: 0.7; metalness: 0.1;" 
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 16000; easing: linear; id: jupiter-rot">
+        </a-sphere>
+        <!-- Cincin Planeter Jupiter (Independen dari rotasi planet utama) -->
+        <a-ring 
+          position="0 0.5 0" 
+          rotation="82 0 0" 
+          radius-inner="0.85" 
+          radius-outer="1.2" 
+          material="color: #cbb49e; opacity: 0.5; side: double; transparent: true; roughness: 0.8;">
+        </a-ring>
+      </a-entity>
+    </a-marker>
+
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <!-- ================= Interactive Controls & Sound Script ================= -->
+  <script>
+    let audioCtx = null;
+    let isRotationOn = true;
+    let isSpeedFast = false;
+    let activePlanet = null;
+
+    // Web Audio API Synthesizer (Instant SFX without external dependencies)
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playScanSuccess() {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      
+      // Futuristic 2-tone ping sound
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(440, now); // A4
+      osc1.frequency.exponentialRampToValueAtTime(880, now + 0.1); // A5
+      
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(880, now);
+      osc2.frequency.exponentialRampToValueAtTime(1760, now + 0.15);
+      
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + 0.3);
+      osc2.stop(now + 0.3);
+    }
+
+    function playClick() {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, now);
+      osc.frequency.setValueAtTime(300, now + 0.05);
+      
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.start(now);
+      osc.stop(now + 0.1);
+    }
+
+    function playAlert() {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(150, now);
+      osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+      
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.start(now);
+      osc.stop(now + 0.2);
+    }
+
+    // Toggle Planet Spheres Rotation Play/Pause
+    function toggleRotation() {
+      isRotationOn = !isRotationOn;
+      const btn = document.querySelector('button[onclick*="toggleRotation"]');
+      
+      const planets = ['earth-mesh', 'mars-mesh', 'jupiter-mesh'];
+      
+      planets.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          if (isRotationOn) {
+            el.setAttribute('animation', 'dur', isSpeedFast ? 2000 : 12000);
+            el.play();
+          } else {
+            el.pause();
+          }
+        }
+      });
+
+      // Moons & Orbits Handling
+      const orbits = ['moon-orbit', 'phobos-orbit', 'deimos-orbit'];
+      orbits.forEach(id => {
+        const el = document.querySelector(`[id$="${id}"]`);
+        if (el) {
+          if (isRotationOn) el.play();
+          else el.pause();
+        }
+      });
+      
+      btn.innerText = isRotationOn ? '🔄 Putar: ON' : '⏸️ Putar: OFF';
+    }
+
+    // Adjust Rotational Speed Factor
+    function toggleSpeed() {
+      isSpeedFast = !isSpeedFast;
+      const btn = document.querySelector('button[onclick*="toggleSpeed"]');
+      
+      const configs = [
+        { id: 'earth-mesh', normal: 12000, fast: 2000 },
+        { id: 'mars-mesh', normal: 12000, fast: 2000 },
+        { id: 'jupiter-mesh', normal: 16000, fast: 2500 }
+      ];
+      
+      configs.forEach(cfg => {
+        const el = document.getElementById(cfg.id);
+        if (el) {
+          el.setAttribute('animation', 'dur', isSpeedFast ? cfg.fast : cfg.normal);
+        }
+      });
+
+      btn.innerText = isSpeedFast ? '⚡ Fast Mode' : '🐌 Slow Mode';
+      btn.style.color = isSpeedFast ? 'var(--secondary)' : 'var(--primary)';
+      btn.style.borderColor = isSpeedFast ? 'var(--secondary)' : 'var(--border-glass)';
+    }
+
+
+    function hideAllCards() {
+      document.querySelectorAll('.planet-card').forEach(card => {
+        card.classList.remove('active');
+      });
+    }
+
+    function startScanner() {
+      playClick();
+      const modal = document.getElementById('introModal');
+      modal.classList.add('hidden');
+    }
+
+    function toggleHelpModal() {
+      const modal = document.getElementById('helpModal');
+      modal.classList.toggle('active');
+    }
+  </script>
+</body>
+</html>
