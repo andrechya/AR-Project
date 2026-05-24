@@ -474,14 +474,14 @@
     .intro-modal {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(5, 8, 16, 0.95);
+      background: radial-gradient(circle at center, rgba(10, 17, 32, 0.98) 0%, rgba(3, 5, 12, 0.99) 100%);
       z-index: 100;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
-      backdrop-filter: blur(20px);
-      transition: all 0.5s ease;
+      padding: 24px;
+      backdrop-filter: blur(24px);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .intro-modal.hidden {
@@ -490,93 +490,164 @@
     }
 
     .intro-card {
-      background: rgba(10, 16, 32, 0.8);
-      border: 1px solid var(--border-glass);
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       width: 100%;
-      max-width: 480px;
+      max-width: 440px;
       border-radius: 24px;
-      padding: 36px;
+      padding: 32px 28px;
       text-align: center;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.8), 0 0 30px rgba(0, 240, 255, 0.2);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 80px rgba(0, 240, 255, 0.05);
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
     }
 
-    .intro-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-      animation: float 3s ease-in-out infinite;
+    .intro-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.4), transparent);
+    }
+
+    .intro-logo-wrapper {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 18px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.35));
+      animation: orbit-pulse 4s ease-in-out infinite alternate;
+    }
+
+    .intro-logo-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    @keyframes orbit-pulse {
+      0% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.3)); }
+      100% { transform: translateY(-4px) scale(1.03); filter: drop-shadow(0 0 20px rgba(189, 0, 255, 0.4)); }
     }
 
     .intro-title {
       font-family: var(--font-sci-fi);
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 900;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       color: #fff;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #fff 40%, var(--primary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .intro-desc {
-      font-size: 14px;
+      font-size: 13.5px;
       line-height: 1.6;
-      color: rgba(255,255,255,0.7);
+      color: rgba(255, 255, 255, 0.7);
       margin-bottom: 24px;
+      font-family: var(--font-body);
     }
 
-    .marker-grid-list {
+    .marker-guide {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 20px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .guide-heading {
+      font-family: var(--font-sci-fi);
+      font-size: 10px;
+      color: rgba(0, 240, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .marker-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .marker-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 10px 14px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      text-align: left;
-      margin-bottom: 28px;
+      gap: 4px;
+      transition: all 0.3s ease;
     }
 
-    .marker-item {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
-      padding: 12px;
-      border-radius: 12px;
+    .marker-card:hover {
+      border-color: rgba(0, 240, 255, 0.2);
+      background: rgba(0, 240, 255, 0.02);
+    }
+
+    .marker-header {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 14px;
     }
 
-    .marker-badge {
-      background: var(--primary);
-      color: #000;
+    .marker-code {
       font-family: var(--font-sci-fi);
+      font-size: 11px;
       font-weight: 700;
-      font-size: 10px;
-      padding: 4px 8px;
-      border-radius: 6px;
-      min-width: 65px;
-      text-align: center;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    .marker-details {
-      font-size: 12px;
-      color: rgba(255,255,255,0.9);
+    .marker-planet-tag {
+      font-family: var(--font-body);
+      font-size: 11px;
       font-weight: 600;
+      color: #fff;
+    }
+
+    .marker-info {
+      font-family: var(--font-body);
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.45);
+      line-height: 1.4;
     }
 
     .btn-start {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
       color: #fff;
       border: none;
-      padding: 14px 32px;
-      border-radius: 14px;
-      font-family: var(--font-sci-fi);
-      font-size: 14px;
-      font-weight: 700;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 600;
       letter-spacing: 1px;
       cursor: pointer;
       width: 100%;
-      box-shadow: 0 8px 24px rgba(0, 240, 255, 0.3);
-      transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(0, 180, 219, 0.25);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
     .btn-start:hover {
-      box-shadow: 0 12px 30px rgba(0, 240, 255, 0.5);
+      box-shadow: 0 8px 30px rgba(0, 180, 219, 0.4);
       transform: translateY(-2px);
+      background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
     }
 
     /* HELP MODAL FOR PRINTING MARKERS */
@@ -758,28 +829,65 @@
   <!-- ================= WELCOME INTRO MODAL ================= -->
   <div class="intro-modal" id="introModal">
     <div class="intro-card">
-      <div class="intro-icon">🌌</div>
-      <h1 class="intro-title">AR SPACE SCANNER</h1>
+      <div class="intro-logo-wrapper">
+        <svg class="intro-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Star glow -->
+          <circle cx="50" cy="50" r="16" fill="url(#starGlow)" />
+          <!-- Sun/Central Star -->
+          <circle cx="50" cy="50" r="6" fill="#ffffff" />
+          <!-- Orbit 1 (Inner) -->
+          <ellipse cx="50" cy="50" rx="20" ry="8" stroke="rgba(0, 240, 255, 0.4)" stroke-width="1.5" transform="rotate(-15 50 50)" />
+          <!-- Planet on Orbit 1 -->
+          <circle cx="33" cy="45" r="3" fill="var(--primary)" />
+          <!-- Orbit 2 (Outer) -->
+          <ellipse cx="50" cy="50" rx="38" ry="16" stroke="rgba(189, 0, 255, 0.3)" stroke-width="1.5" transform="rotate(20 50 50)" stroke-dasharray="4 4" />
+          <!-- Planet on Orbit 2 -->
+          <circle cx="75" cy="59" r="4.5" fill="var(--secondary)" />
+          <defs>
+            <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="var(--primary)" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+        </svg>
+      </div>
+
+      <h1 class="intro-title">Solar System AR</h1>
       <p class="intro-desc">
-        Selamat datang di pemindai planet Augmented Reality interaktif. Arahkan kamera Anda ke penanda (markers) yang disiapkan di bawah untuk menghidupkan objek 3D kosmik dengan visual premium dan orbital dinamis.
+        Jelajahi keindahan tata surya secara interaktif langsung di ruang Anda. Arahkan kamera perangkat ke penanda cetak untuk memproyeksikan visualisasi planet 3D dengan detail orbit yang presisi.
       </p>
 
-      <div class="marker-grid-list">
-        <div class="marker-item">
-          <span class="marker-badge">HIRO</span>
-          <span class="marker-details">Bumi &amp; Bulan (Animasi Orbit)</span>
-        </div>
-        <div class="marker-item">
-          <span class="marker-badge">KANJI</span>
-          <span class="marker-details">Mars &amp; Satelit Phobos/Deimos</span>
-        </div>
-        <div class="marker-item">
-          <span class="marker-badge">BARCODE 0</span>
-          <span class="marker-details">Jupiter &amp; Cincin Raksasa Gas</span>
+      <div class="marker-guide">
+        <h2 class="guide-heading">Panduan Target Pindai</h2>
+        <div class="marker-grid">
+          <div class="marker-card">
+            <div class="marker-header">
+              <span class="marker-code">Hiro</span>
+              <span class="marker-planet-tag">Bumi &amp; Bulan</span>
+            </div>
+            <div class="marker-info">Proyeksi Bumi &amp; Bulan dalam orbit dinamis</div>
+          </div>
+          <div class="marker-card">
+            <div class="marker-header">
+              <span class="marker-code">Kanji</span>
+              <span class="marker-planet-tag">Mars</span>
+            </div>
+            <div class="marker-info">Visualisasi Mars beserta Phobos &amp; Deimos</div>
+          </div>
+          <div class="marker-card">
+            <div class="marker-header">
+              <span class="marker-code">Barcode 0</span>
+              <span class="marker-planet-tag">Jupiter</span>
+            </div>
+            <div class="marker-info">Raksasa gas dengan cincin tipis planeter</div>
+          </div>
         </div>
       </div>
 
-      <button class="btn-start" onclick="startScanner()">AKTIFKAN PEMINDAI</button>
+      <button class="btn-start" onclick="startScanner()">
+        <span>Mulai Memindai</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 2px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </button>
     </div>
   </div>
 
