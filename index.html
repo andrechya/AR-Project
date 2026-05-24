@@ -575,7 +575,7 @@
 
     .marker-grid {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, 1fr);
       gap: 10px;
     }
 
@@ -820,6 +820,10 @@
         align-items: flex-start;
         box-shadow: 0 4px 20px rgba(0,0,0,0.5);
       }
+      .marker-grid {
+        grid-template-columns: 1fr !important;
+        gap: 8px;
+      }
     }
   </style>
 </head>
@@ -858,28 +862,49 @@
       </p>
 
       <div class="marker-guide">
-        <h2 class="guide-heading">Panduan Target Pindai</h2>
+        <h2 class="guide-heading">Panduan Target Pindai (6 Objek Kosmik)</h2>
         <div class="marker-grid">
           <div class="marker-card">
             <div class="marker-header">
               <span class="marker-code">Hiro</span>
-              <span class="marker-planet-tag">Bumi &amp; Bulan</span>
+              <span class="marker-planet-tag">Bumi</span>
             </div>
-            <div class="marker-info">Proyeksi Bumi &amp; Bulan dalam orbit dinamis</div>
+            <div class="marker-info">Bumi &amp; Bulan (Orbit Dinamis)</div>
           </div>
           <div class="marker-card">
             <div class="marker-header">
               <span class="marker-code">Kanji</span>
               <span class="marker-planet-tag">Mars</span>
             </div>
-            <div class="marker-info">Visualisasi Mars beserta Phobos &amp; Deimos</div>
+            <div class="marker-info">Mars &amp; Dua Satelit Alami</div>
           </div>
           <div class="marker-card">
             <div class="marker-header">
               <span class="marker-code">Barcode 0</span>
               <span class="marker-planet-tag">Jupiter</span>
             </div>
-            <div class="marker-info">Raksasa gas dengan cincin tipis planeter</div>
+            <div class="marker-info">Raksasa Gas &amp; Sistem Cincin</div>
+          </div>
+          <div class="marker-card">
+            <div class="marker-header">
+              <span class="marker-code">Barcode 1</span>
+              <span class="marker-planet-tag">Saturnus</span>
+            </div>
+            <div class="marker-info">Sistem Cincin Es Raksasa Megah</div>
+          </div>
+          <div class="marker-card">
+            <div class="marker-header">
+              <span class="marker-code">Barcode 2</span>
+              <span class="marker-planet-tag">Matahari</span>
+            </div>
+            <div class="marker-info">Inti Bintang &amp; Korona Pijar</div>
+          </div>
+          <div class="marker-card">
+            <div class="marker-header">
+              <span class="marker-code">Barcode 3</span>
+              <span class="marker-planet-tag">Venus</span>
+            </div>
+            <div class="marker-info">Kembaran Bumi &amp; Efek Gas Ekstrem</div>
           </div>
         </div>
       </div>
