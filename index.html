@@ -20,6 +20,9 @@
         if (id === 'marker-earth') planetName = 'earth';
         else if (id === 'marker-mars') planetName = 'mars';
         else if (id === 'marker-jupiter') planetName = 'jupiter';
+        else if (id === 'marker-saturn') planetName = 'saturn';
+        else if (id === 'marker-sun') planetName = 'sun';
+        else if (id === 'marker-venus') planetName = 'venus';
 
         el.addEventListener('markerFound', () => {
           activePlanet = planetName;
@@ -697,21 +700,39 @@
       
       <div class="help-body">
         <div class="help-marker-box">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/4/48/Hiro_marker_ARjs.png" alt="Hiro Marker">
-          <div class="help-marker-name">Hiro Marker (Bumi)</div>
-          <a class="btn-link" href="https://upload.wikimedia.org/wikipedia/commons/4/48/Hiro_marker_ARjs.png" target="_blank">Unduh Gambar</a>
+          <img src="https://arprojectsdemo.netlify.app/markers/hiro.png" alt="Hiro Marker">
+          <div class="help-marker-name">Hiro (Bumi)</div>
+          <a class="btn-link" href="https://arprojectsdemo.netlify.app/markers/hiro.png" target="_blank">Unduh Gambar</a>
         </div>
         
         <div class="help-marker-box">
           <img src="https://arprojectsdemo.netlify.app/markers/kanji.png" alt="Kanji Marker">
-          <div class="help-marker-name">Kanji Marker (Mars)</div>
+          <div class="help-marker-name">Kanji (Mars)</div>
           <a class="btn-link" href="https://arprojectsdemo.netlify.app/markers/kanji.png" target="_blank">Unduh Gambar</a>
         </div>
 
         <div class="help-marker-box">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://github.com/nicolocarpignoli/artoolkit-barcode-generator/raw/master/barcodes/3x3/matrix/matrix-0.png" alt="Barcode 0">
+          <img src="https://raw.githubusercontent.com/nicolocarpignoli/artoolkit-barcode-markers-collection/master/3x3/3x3-0.png" alt="Barcode 0">
           <div class="help-marker-name">Barcode 0 (Jupiter)</div>
-          <a class="btn-link" href="https://github.com/nicolocarpignoli/artoolkit-barcode-generator/raw/master/barcodes/3x3/matrix/matrix-0.png" target="_blank">Unduh Gambar</a>
+          <a class="btn-link" href="https://raw.githubusercontent.com/nicolocarpignoli/artoolkit-barcode-markers-collection/master/3x3/3x3-0.png" target="_blank">Unduh Gambar</a>
+        </div>
+
+        <div class="help-marker-box">
+          <img src="https://raw.githubusercontent.com/nicolocarpignoli/artoolkit-barcode-markers-collection/master/3x3/3x3-1.png" alt="Barcode 1">
+          <div class="help-marker-name">Barcode 1 (Saturnus)</div>
+          <a class="btn-link" href="https://raw.githubusercontent.com/nicolocarpignoli/artoolkit-barcode-markers-collection/master/3x3/3x3-1.png" target="_blank">Unduh Gambar</a>
+        </div>
+
+        <div class="help-marker-box">
+          <img src="https://raw.githubusercontent.com/nicolocarpignoli/artoolkit-barcode-markers-collection/master/3x3/3x3-2.png" alt="Barcode 2">
+          <div class="help-marker-name">Barcode 2 (Matahari)</div>
+          <a class="btn-link" href="https://raw.githubusercontent.com/nicolocarpignoli/artoolkit-barcode-markers-collection/master/3x3/3x3-2.png" target="_blank">Unduh Gambar</a>
+        </div>
+
+        <div class="help-marker-box">
+          <img src="https://raw.githubusercontent.com/nicolocarpignoli/artoolkit-barcode-markers-collection/master/3x3/3x3-3.png" alt="Barcode 3">
+          <div class="help-marker-name">Barcode 3 (Venus)</div>
+          <a class="btn-link" href="https://raw.githubusercontent.com/nicolocarpignoli/artoolkit-barcode-markers-collection/master/3x3/3x3-3.png" target="_blank">Unduh Gambar</a>
         </div>
       </div>
       
@@ -930,6 +951,65 @@
       </a-entity>
     </a-marker>
 
+    <!-- SATURNUS MARKER (BARCODE 1) -->
+    <a-marker type="barcode" value="1" id="marker-saturn" marker-handler>
+      <!-- Saturnus Container -->
+      <a-entity id="saturn-container">
+        <!-- Saturn Sphere -->
+        <a-sphere 
+          id="saturn-mesh" 
+          position="0 0.5 0" 
+          radius="0.5" 
+          material="src: https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/saturn.jpg; roughness: 0.9; metalness: 0.1;" 
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 14000; easing: linear; id: saturn-rot">
+        </a-sphere>
+        <!-- Cincin Es Raksasa Saturnus -->
+        <a-ring 
+          position="0 0.5 0" 
+          rotation="80 0 0" 
+          radius-inner="0.68" 
+          radius-outer="1.28" 
+          material="color: #e2bf7d; opacity: 0.75; side: double; transparent: true; roughness: 0.8;">
+        </a-ring>
+      </a-entity>
+    </a-marker>
+
+    <!-- MATAHARI MARKER (BARCODE 2) -->
+    <a-marker type="barcode" value="2" id="marker-sun" marker-handler>
+      <!-- Sun Container -->
+      <a-entity id="sun-container">
+        <!-- Sun Sphere (Flat shader ensures it glows naturally) -->
+        <a-sphere 
+          id="sun-mesh" 
+          position="0 0.5 0" 
+          radius="0.65" 
+          material="src: https://raw.githubusercontent.com/aframevr/sample-assets/master/assets/images/space/sun.jpg; shader: flat;" 
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 30000; easing: linear; id: sun-rot">
+        </a-sphere>
+        <!-- Glowing Corona Aura -->
+        <a-sphere 
+          position="0 0.5 0" 
+          radius="0.76" 
+          material="color: #ffaa00; opacity: 0.25; transparent: true; shader: flat; side: back;">
+        </a-sphere>
+      </a-entity>
+    </a-marker>
+
+    <!-- VENUS MARKER (BARCODE 3) -->
+    <a-marker type="barcode" value="3" id="marker-venus" marker-handler>
+      <!-- Venus Container -->
+      <a-entity id="venus-container">
+        <!-- Venus Sphere -->
+        <a-sphere 
+          id="venus-mesh" 
+          position="0 0.5 0" 
+          radius="0.48" 
+          material="src: https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/venus_atmosphere.jpg; roughness: 0.8; metalness: 0.1;" 
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 20000; easing: linear; id: venus-rot">
+        </a-sphere>
+      </a-entity>
+    </a-marker>
+
     <a-entity camera></a-entity>
   </a-scene>
 
@@ -1028,13 +1108,21 @@
       isRotationOn = !isRotationOn;
       const btn = document.querySelector('button[onclick*="toggleRotation"]');
       
-      const planets = ['earth-mesh', 'mars-mesh', 'jupiter-mesh'];
+      const planets = ['earth-mesh', 'mars-mesh', 'jupiter-mesh', 'saturn-mesh', 'sun-mesh', 'venus-mesh'];
       
       planets.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
           if (isRotationOn) {
-            el.setAttribute('animation', 'dur', isSpeedFast ? 2000 : 12000);
+            // Restore proper rotational speed based on planet normal/fast settings
+            let dur = 12000;
+            if (id === 'jupiter-mesh') dur = isSpeedFast ? 2500 : 16000;
+            else if (id === 'saturn-mesh') dur = isSpeedFast ? 2200 : 14000;
+            else if (id === 'sun-mesh') dur = isSpeedFast ? 5000 : 30000;
+            else if (id === 'venus-mesh') dur = isSpeedFast ? 3000 : 20000;
+            else dur = isSpeedFast ? 2000 : 12000;
+            
+            el.setAttribute('animation', 'dur', dur);
             el.play();
           } else {
             el.pause();
@@ -1063,7 +1151,10 @@
       const configs = [
         { id: 'earth-mesh', normal: 12000, fast: 2000 },
         { id: 'mars-mesh', normal: 12000, fast: 2000 },
-        { id: 'jupiter-mesh', normal: 16000, fast: 2500 }
+        { id: 'jupiter-mesh', normal: 16000, fast: 2500 },
+        { id: 'saturn-mesh', normal: 14000, fast: 2200 },
+        { id: 'sun-mesh', normal: 30000, fast: 5000 },
+        { id: 'venus-mesh', normal: 20000, fast: 3000 }
       ];
       
       configs.forEach(cfg => {
