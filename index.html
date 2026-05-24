@@ -290,6 +290,9 @@
       pointer-events: auto;
       position: relative;
       overflow: hidden;
+      max-height: 75vh;
+      display: flex;
+      flex-direction: column;
     }
 
     .planet-card.active {
@@ -344,6 +347,22 @@
       line-height: 1.6;
       color: rgba(255,255,255,0.85);
       margin-bottom: 16px;
+      overflow-y: auto;
+      max-height: 110px;
+      padding-right: 6px;
+    }
+
+    /* Gaya Scrollbar Neon Kustom untuk Deskripsi */
+    .planet-desc::-webkit-scrollbar {
+      width: 4px;
+    }
+    .planet-desc::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 2px;
+    }
+    .planet-desc::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 2px;
     }
 
     .specs-grid {
@@ -617,6 +636,10 @@
       }
       .planet-card {
         padding: 14px 16px;
+        max-height: 65vh;
+      }
+      .planet-desc {
+        max-height: 85px;
       }
       .status-panel {
         top: auto;
