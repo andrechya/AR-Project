@@ -318,7 +318,7 @@
 
     .planet-title {
       font-family: var(--font-sci-fi);
-      font-size: 24px;
+      font-size: clamp(18px, 5vw, 24px);
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 2px;
@@ -605,14 +605,18 @@
 
     /* RESPONSIVE */
     @media (max-width: 600px) {
+      .interactive-ui {
+        padding: 12px;
+      }
       .specs-grid {
         grid-template-columns: 1fr;
+        gap: 8px;
       }
       .help-body {
         grid-template-columns: 1fr;
       }
       .planet-card {
-        padding: 16px;
+        padding: 14px 16px;
       }
       .status-panel {
         top: auto;
@@ -733,7 +737,7 @@
           <div class="planet-tag">Marker Hiro</div>
         </div>
         <div class="planet-desc">
-          Bumi adalah planet ketiga dari Matahari, satu-satunya benda astronomi yang diketahui menampung kehidupan. Planet ini memiliki atmosfer yang kaya oksigen dan samudera air cair yang luas.
+          Bumi (Earth) adalah planet ketiga dari Matahari dan satu-satunya tempat di alam semesta yang terbukti mendukung kehidupan. Keunikannya didukung oleh keberadaan cairan air stabil di permukaan, atmosfer tebal kaya Nitrogen (78%) &amp; Oksigen (21%), lempeng tektonik aktif yang mendaur ulang karbon, serta medan magnet kuat yang melindungi biosfer dari radiasi kosmik matahari.
         </div>
         <div class="specs-grid">
           <div class="spec-item">
@@ -762,7 +766,7 @@
           <div class="planet-tag">Marker Kanji</div>
         </div>
         <div class="planet-desc">
-          Sering disebut 'Planet Merah' karena besi oksida di permukaannya memberikan tampilan kemerahan yang khas. Mars memiliki gunung berapi terbesar (Olympus Mons) di Tata Surya.
+          Mars (Planet Merah) adalah planet terestrial dingin dengan atmosfer tipis berbasis CO₂. Warna kemerahan permukaannya berasal dari karat besi oksida. Mars menyimpan rahasia sejarah air kuno melalui saluran sungai mati dan tudung es kutub, serta memiliki fitur ekstrem seperti gunung berapi terbesar (Olympus Mons) dan lembah terdalam (Valles Marineris) di Tata Surya.
         </div>
         <div class="specs-grid">
           <div class="spec-item">
@@ -791,7 +795,7 @@
           <div class="planet-tag">Barcode 0</div>
         </div>
         <div class="planet-desc">
-          Raksasa gas terbesar di tata surya kita, memiliki massa dua kali lipat dari gabungan semua planet lain. Memiliki badai ikonik "Bintik Merah Besar" yang lebih besar dari diameter Bumi.
+          Jupiter adalah raksasa gas terbesar di Tata Surya dengan massa 318 kali lipat Bumi. Planet ini didominasi gas Hidrogen dan Helium tanpa permukaan padat yang jelas. Atmosfer luarnya mengalami turbulensi hebat dengan badai legendaris "Bintik Merah Besar" yang berusia ratusan tahun, dikelilingi oleh cincin tipis dan puluhan satelit pengorbit (seperti Europa yang memiliki samudra bawah es).
         </div>
         <div class="specs-grid">
           <div class="spec-item">
