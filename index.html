@@ -482,6 +482,8 @@
       padding: 24px;
       backdrop-filter: blur(24px);
       transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .intro-modal.hidden {
@@ -501,6 +503,7 @@
       backdrop-filter: blur(12px);
       position: relative;
       overflow: hidden;
+      margin: auto;
     }
 
     .intro-card::before {
@@ -664,6 +667,8 @@
       opacity: 0;
       pointer-events: none;
       transition: all 0.4s ease;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .help-modal.active {
@@ -680,6 +685,7 @@
       padding: 30px;
       max-height: 90vh;
       overflow-y: auto;
+      margin: auto;
     }
 
     .help-header {
@@ -823,6 +829,13 @@
       .marker-grid {
         grid-template-columns: 1fr !important;
         gap: 8px;
+      }
+      .intro-card {
+        padding: 24px 16px;
+        border-radius: 16px;
+      }
+      .intro-title {
+        font-size: 20px;
       }
     }
   </style>
