@@ -30,14 +30,13 @@
           
           // Update Top Right Status
           const statusSpan = document.querySelector('#scannerStatus span');
-          const statusRadar = document.querySelector('.scanner-radar');
+          const statusDot = document.querySelector('.status-dot');
           if (statusSpan) {
             statusSpan.innerText = `TERKUNCI: ${planetName.toUpperCase()}`;
-            statusSpan.style.color = 'var(--primary)';
+            statusSpan.style.color = 'var(--accent)';
           }
-          if (statusRadar) {
-            statusRadar.style.animationPlayState = 'running';
-            statusRadar.style.borderColor = 'var(--primary)';
+          if (statusDot) {
+            statusDot.classList.add('active');
           }
           
           // Show Info Card
@@ -53,14 +52,13 @@
             
             // Reset Status Panel
             const statusSpan = document.querySelector('#scannerStatus span');
-            const statusRadar = document.querySelector('.scanner-radar');
+            const statusDot = document.querySelector('.status-dot');
             if (statusSpan) {
-              statusSpan.innerText = 'MENCARI MARKER...';
-              statusSpan.style.color = '#fff';
+              statusSpan.innerText = 'MENCARI PENANDA...';
+              statusSpan.style.color = 'var(--text-muted)';
             }
-            if (statusRadar) {
-              statusRadar.style.animationPlayState = 'running';
-              statusRadar.style.borderColor = '#fff';
+            if (statusDot) {
+              statusDot.classList.remove('active');
             }
             
             if (typeof hideAllCards === 'function') hideAllCards();
@@ -70,19 +68,25 @@
     });
   </script>
   
-  <!-- Google Fonts for Premium Sci-Fi Look -->
+  <!-- Google Fonts for Premium Minimalist Aesthetic -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --primary: #00f0ff;
-      --secondary: #bd00ff;
-      --bg-glass: rgba(10, 15, 30, 0.7);
-      --border-glass: rgba(0, 240, 255, 0.2);
-      --text: #e2e8f0;
-      --font-sci-fi: 'Orbitron', sans-serif;
+      --primary: #6366f1; /* Indigo */
+      --primary-light: #818cf8;
+      --primary-glow: rgba(99, 102, 241, 0.15);
+      --accent: #10b981; /* Emerald (detection success) */
+      --accent-muted: #6b7280; /* Neutral search */
+      --bg-dark: #070913;
+      --bg-card: rgba(13, 17, 30, 0.8);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(99, 102, 241, 0.3);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --font-heading: 'Plus Jakarta Sans', sans-serif;
       --font-body: 'Inter', sans-serif;
     }
 
@@ -96,7 +100,7 @@
       margin: 0;
       overflow: hidden;
       font-family: var(--font-body);
-      background-color: #000;
+      background-color: var(--bg-dark);
       color: var(--text);
     }
 
@@ -104,44 +108,6 @@
     video {
       object-fit: contain !important;
     }
-
-    /* ================= Sci-Fi HUD HUD (Overlay) ================= */
-    .hud-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 5;
-      box-shadow: inset 0 0 80px rgba(0, 240, 255, 0.15);
-      transition: all 0.5s ease;
-    }
-
-    /* Scanlines effect */
-    .hud-overlay::after {
-      content: " ";
-      display: block;
-      position: absolute;
-      top: 0; left: 0; bottom: 0; right: 0;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-      z-index: 6;
-      background-size: 100% 4px, 6px 100%;
-      opacity: 0.4;
-    }
-
-    /* Sci-Fi Corners */
-    .corner {
-      position: absolute;
-      width: 24px;
-      height: 24px;
-      border: 3px solid var(--primary);
-      pointer-events: none;
-    }
-    .top-left { top: 20px; left: 20px; border-right: none; border-bottom: none; }
-    .top-right { top: 20px; right: 20px; border-left: none; border-bottom: none; }
-    .bottom-left { bottom: 20px; left: 20px; border-right: none; border-top: none; }
-    .bottom-right { bottom: 20px; right: 20px; border-left: none; border-top: none; }
 
     /* Interactive UI Wrapper */
     .interactive-ui {
@@ -173,8 +139,8 @@
     }
 
     .pulse-dot {
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       background-color: var(--primary);
       border-radius: 50%;
       box-shadow: 0 0 12px var(--primary);
@@ -182,12 +148,11 @@
     }
 
     .logo-text {
-      font-family: var(--font-sci-fi);
-      font-size: 16px;
-      font-weight: 900;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #fff;
     }
 
     /* CONTROL BUTTONS */
@@ -197,33 +162,30 @@
       pointer-events: auto;
     }
 
-    .btn-hud {
-      background: var(--bg-glass);
-      border: 1px solid var(--border-glass);
-      color: var(--primary);
+    .btn-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text);
       padding: 8px 16px;
-      border-radius: 8px;
-      font-family: var(--font-sci-fi);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1px;
+      border-radius: 9999px;
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 500;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      gap: 8px;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
     }
 
-    .btn-hud:hover {
-      background: var(--primary);
-      color: #000;
-      border-color: var(--primary);
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
-      transform: translateY(-2px);
+    .btn-pill:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
     }
 
-    .btn-hud:active {
+    .btn-pill:active {
       transform: translateY(1px);
     }
 
@@ -232,56 +194,70 @@
       position: absolute;
       top: 80px;
       right: 24px;
-      background: var(--bg-glass);
-      border: 1px solid var(--border-glass);
-      backdrop-filter: blur(10px);
-      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(16px);
+      border-radius: 16px;
       padding: 12px 18px;
       pointer-events: auto;
       min-width: 180px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      transition: border-color 0.3s ease;
     }
 
     .status-title {
-      font-family: var(--font-sci-fi);
+      font-family: var(--font-body);
       font-size: 10px;
-      color: rgba(255,255,255,0.5);
-      letter-spacing: 1px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
       margin-bottom: 4px;
+      text-transform: uppercase;
     }
 
     .status-value {
-      font-family: var(--font-sci-fi);
-      font-size: 14px;
+      font-family: var(--font-heading);
+      font-size: 13px;
       font-weight: 700;
       color: #fff;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
-    .scanner-radar {
-      width: 14px;
-      height: 14px;
-      border: 2px solid var(--primary);
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-muted);
       border-radius: 50%;
-      border-top-color: transparent;
-      animation: rotate 1s linear infinite;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .status-dot.active {
+      background-color: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: statusPulse 1.5s infinite alternate;
+    }
+
+    @keyframes statusPulse {
+      0% { opacity: 0.6; }
+      100% { opacity: 1; }
     }
 
     /* PLANET INFO CARD (Docked Bottom Panel) */
     .planet-card-container {
       position: absolute;
       left: 50%;
-      bottom: 0; /* Docked to bottom of screen */
+      bottom: 24px; /* Floating slightly above bottom */
       transform: translateX(-50%);
-      width: 100%;
-      max-width: 720px; /* Spacious width */
+      width: calc(100% - 48px);
+      max-width: 600px;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
       pointer-events: none;
       z-index: 12;
+      transition: all 0.3s ease;
     }
 
     .planet-card {
@@ -289,18 +265,17 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      background: rgba(6, 10, 20, 0.9); /* Opaque for premium readability */
-      border: 1px solid var(--border-glass);
-      border-bottom: none; /* Docked style */
-      backdrop-filter: blur(20px);
-      border-radius: 24px 24px 0 0; /* Rounded top corners only */
-      padding: 20px 28px;
-      box-shadow: 0 -10px 40px rgba(0, 240, 255, 0.15), 0 15px 45px rgba(0,0,0,0.8);
-      transform: translateY(100%); /* Slide out/in from bottom */
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(24px);
+      border-radius: 24px;
+      padding: 24px 28px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      transform: translateY(120%); /* Slide out/in from bottom */
       opacity: 0;
       pointer-events: none; /* Disable interaction when hidden */
       visibility: hidden; /* Hide from layout when inactive */
-      transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s ease, visibility 0.5s, padding 0.4s ease;
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, visibility 0.5s, padding 0.4s ease;
       overflow: hidden;
       max-height: 48vh; /* Optimal height ratio */
       display: flex;
@@ -317,70 +292,61 @@
     .planet-card.minimized {
       padding-top: 14px;
       padding-bottom: 14px;
+      transform: translateY(calc(100% - 68px));
     }
 
-    .planet-card::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    .drag-handle {
+      width: 40px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 2px;
+      margin: 0 auto 16px auto;
+      cursor: pointer;
+    }
+
+    .planet-card.minimized .drag-handle {
+      margin-bottom: 8px;
     }
 
     .planet-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      padding-bottom: 8px;
       cursor: pointer;
-      transition: margin 0.4s ease, border-color 0.4s ease;
-    }
-
-    .planet-card.minimized .planet-header {
-      margin-bottom: 0;
-      border-bottom-color: transparent;
-      padding-bottom: 0;
     }
 
     .planet-title {
-      font-family: var(--font-sci-fi);
-      font-size: clamp(18px, 5vw, 24px);
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      background: linear-gradient(135deg, #fff 30%, var(--primary));
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-family: var(--font-heading);
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
     }
 
     .planet-tag {
-      font-family: var(--font-sci-fi);
-      font-size: 10px;
-      color: var(--primary);
-      letter-spacing: 1px;
-      font-weight: 700;
-      border: 1px solid rgba(0, 240, 255, 0.4);
-      padding: 2px 8px;
-      border-radius: 4px;
+      font-family: var(--font-body);
+      font-size: 11px;
+      color: var(--primary-light);
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 600;
     }
 
     .planet-desc {
+      font-family: var(--font-body);
       font-size: 13.5px;
       line-height: 1.6;
-      color: rgba(255,255,255,0.85);
-      margin-bottom: 16px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
       overflow-y: auto;
-      max-height: 160px;
+      max-height: 140px;
       padding-right: 6px;
     }
 
     .planet-desc, .specs-grid {
-      transition: max-height 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.3s ease, margin 0.4s ease, padding 0.4s ease;
+      transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin 0.4s ease, padding 0.4s ease;
       max-height: 250px;
       opacity: 1;
     }
@@ -403,42 +369,49 @@
       pointer-events: none;
     }
 
-    /* Minimize Sci-Fi Button */
+    /* Minimize Button */
     .btn-minimize {
-      background: none;
-      border: none;
-      color: var(--primary);
-      font-size: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 12px;
       cursor: pointer;
-      transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+      transition: all 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
     }
 
     .btn-minimize:hover {
-      background: rgba(0, 240, 255, 0.15);
+      background: rgba(255, 255, 255, 0.08);
       color: #fff;
     }
 
     .planet-card.minimized .btn-minimize {
-      transform: rotate(-180deg); /* Flip arrow upwards */
+      transform: rotate(-180deg);
     }
 
-    /* Gaya Scrollbar Neon Kustom untuk Deskripsi */
-    .planet-desc::-webkit-scrollbar {
+    /* Scrollbars Styling */
+    .planet-desc::-webkit-scrollbar,
+    .help-card::-webkit-scrollbar {
       width: 4px;
     }
-    .planet-desc::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
+    .planet-desc::-webkit-scrollbar-track,
+    .help-card::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
       border-radius: 2px;
     }
-    .planet-desc::-webkit-scrollbar-thumb {
-      background: var(--primary);
+    .planet-desc::-webkit-scrollbar-thumb,
+    .help-card::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
       border-radius: 2px;
+    }
+    .planet-desc::-webkit-scrollbar-thumb:hover,
+    .help-card::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
     }
 
     .specs-grid {
@@ -449,24 +422,26 @@
     }
 
     .spec-item {
-      background: rgba(255, 255, 255, 0.03);
-      border-left: 2px solid var(--primary);
-      padding: 6px 12px;
-      border-radius: 0 6px 6px 0;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      padding: 10px 14px;
+      border-radius: 12px;
     }
 
     .spec-label {
+      font-family: var(--font-body);
       font-size: 10px;
-      color: rgba(255,255,255,0.4);
+      color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
+      font-weight: 500;
     }
 
     .spec-val {
-      font-family: var(--font-sci-fi);
-      font-size: 13px;
-      font-weight: 700;
+      font-family: var(--font-heading);
+      font-size: 14px;
+      font-weight: 600;
       color: #fff;
     }
 
@@ -474,7 +449,7 @@
     .intro-modal {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: radial-gradient(circle at center, rgba(10, 17, 32, 0.98) 0%, rgba(3, 5, 12, 0.99) 100%);
+      background: radial-gradient(circle at 10% 10%, #0c0f1d 0%, #05060b 100%);
       z-index: 100;
       display: flex;
       align-items: center;
@@ -489,181 +464,149 @@
     .intro-modal.hidden {
       opacity: 0;
       pointer-events: none;
+      transform: scale(1.02);
     }
 
     .intro-card {
-      background: rgba(15, 23, 42, 0.55);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(13, 17, 30, 0.6);
+      border: 1px solid var(--border-subtle);
       width: 100%;
-      max-width: 440px;
-      border-radius: 24px;
-      padding: 32px 28px;
+      max-width: 480px;
+      border-radius: 28px;
+      padding: 40px 36px;
       text-align: center;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 80px rgba(0, 240, 255, 0.05);
-      backdrop-filter: blur(12px);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(16px);
       position: relative;
       overflow: hidden;
       margin: auto;
     }
 
-    .intro-card::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.4), transparent);
-    }
-
     .intro-logo-wrapper {
-      width: 64px;
-      height: 64px;
-      margin: 0 auto 18px auto;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px auto;
       display: flex;
       align-items: center;
       justify-content: center;
-      filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.35));
-      animation: orbit-pulse 4s ease-in-out infinite alternate;
+      filter: drop-shadow(0 10px 20px rgba(99, 102, 241, 0.2));
+      animation: gentle-orbit 6s ease-in-out infinite alternate;
     }
 
-    .intro-logo-svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    @keyframes orbit-pulse {
-      0% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.3)); }
-      100% { transform: translateY(-4px) scale(1.03); filter: drop-shadow(0 0 20px rgba(189, 0, 255, 0.4)); }
+    @keyframes gentle-orbit {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(-6px) rotate(5deg); }
     }
 
     .intro-title {
-      font-family: var(--font-sci-fi);
-      font-size: 24px;
-      font-weight: 900;
-      margin-bottom: 8px;
+      font-family: var(--font-heading);
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 12px;
       color: #fff;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      background: linear-gradient(135deg, #fff 40%, var(--primary));
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
     }
 
     .intro-desc {
-      font-size: 13.5px;
-      line-height: 1.6;
-      color: rgba(255, 255, 255, 0.7);
-      margin-bottom: 24px;
       font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 32px;
     }
 
     .marker-guide {
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      padding-top: 20px;
-      margin-bottom: 24px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 24px;
+      margin-bottom: 32px;
       text-align: left;
     }
 
     .guide-heading {
-      font-family: var(--font-sci-fi);
-      font-size: 10px;
-      color: rgba(0, 240, 255, 0.7);
+      font-family: var(--font-heading);
+      font-size: 12px;
+      color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 1.5px;
-      margin-bottom: 12px;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
       font-weight: 700;
     }
 
-    .marker-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    .marker-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-      padding: 10px 14px;
+    .steps-container {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      transition: all 0.3s ease;
+      gap: 14px;
     }
 
-    .marker-card:hover {
-      border-color: rgba(0, 240, 255, 0.2);
-      background: rgba(0, 240, 255, 0.02);
-    }
-
-    .marker-header {
+    .step-item-guide {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
+      gap: 12px;
     }
 
-    .marker-code {
-      font-family: var(--font-sci-fi);
-      font-size: 11px;
+    .step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      color: var(--primary-light);
+      font-family: var(--font-heading);
+      font-size: 12px;
       font-weight: 700;
-      color: var(--primary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .marker-planet-tag {
-      font-family: var(--font-body);
-      font-size: 11px;
-      font-weight: 600;
-      color: #fff;
-    }
-
-    .marker-info {
-      font-family: var(--font-body);
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.45);
-      line-height: 1.4;
-    }
-
-    .btn-start {
-      background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
-      color: #fff;
-      border: none;
-      padding: 14px 28px;
-      border-radius: 12px;
-      font-family: var(--font-body);
-      font-size: 13.5px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      cursor: pointer;
-      width: 100%;
-      box-shadow: 0 4px 20px rgba(0, 180, 219, 0.25);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .step-text {
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .btn-start {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 16px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
 
     .btn-start:hover {
-      box-shadow: 0 8px 30px rgba(0, 180, 219, 0.4);
+      background: var(--primary-light);
+      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.4);
       transform: translateY(-2px);
-      background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
     }
 
-    /* HELP MODAL FOR PRINTING MARKERS */
+    .btn-start:active {
+      transform: translateY(1px);
+    }
+
+    /* HELP/PRINT MODAL */
     .help-modal {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(5, 8, 16, 0.95);
+      background: rgba(7, 9, 19, 0.95);
       z-index: 150;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
-      backdrop-filter: blur(15px);
+      padding: 24px;
+      backdrop-filter: blur(20px);
       opacity: 0;
       pointer-events: none;
       transition: all 0.4s ease;
@@ -677,77 +620,99 @@
     }
 
     .help-card {
-      background: rgba(10, 16, 32, 0.95);
-      border: 1px solid var(--border-glass);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
       width: 100%;
-      max-width: 600px;
-      border-radius: 24px;
-      padding: 30px;
+      max-width: 640px;
+      border-radius: 28px;
+      padding: 36px;
       max-height: 90vh;
       overflow-y: auto;
       margin: auto;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
     }
 
     .help-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .help-title {
-      font-family: var(--font-sci-fi);
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--primary);
+      font-family: var(--font-heading);
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
     }
 
     .help-close {
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 24px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 18px;
       cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .help-close:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
     }
 
     .help-body {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 28px;
     }
 
     .help-marker-box {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 12px;
-      padding: 12px;
+      background: rgba(255,255,255,0.01);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 14px;
       text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .help-marker-box:hover {
+      background: rgba(255,255,255,0.03);
+      border-color: rgba(99, 102, 241, 0.3);
     }
 
     .help-marker-box img {
       width: 100%;
       aspect-ratio: 1;
       background: white;
-      padding: 8px;
-      border-radius: 8px;
-      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 12px;
     }
 
     .help-marker-name {
-      font-family: var(--font-sci-fi);
-      font-size: 11px;
+      font-family: var(--font-heading);
+      font-size: 12px;
       font-weight: 700;
-      margin-bottom: 8px;
+      color: #fff;
+      margin-bottom: 10px;
     }
 
     .btn-link {
-      background: rgba(0, 240, 255, 0.1);
-      color: var(--primary);
-      border: 1px solid rgba(0, 240, 255, 0.3);
-      font-size: 10px;
-      padding: 4px 8px;
-      border-radius: 6px;
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary-light);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 8px;
       text-decoration: none;
       display: inline-block;
       width: 100%;
@@ -757,7 +722,8 @@
 
     .btn-link:hover {
       background: var(--primary);
-      color: #000;
+      color: #fff;
+      border-color: var(--primary);
     }
 
     /* ANIMATIONS */
@@ -770,25 +736,27 @@
       100% { transform: rotate(360deg); }
     }
 
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
     /* RESPONSIVE */
     @media (max-width: 600px) {
       .interactive-ui {
-        padding: 12px;
+        padding: 16px;
       }
       .planet-card-container {
-        position: absolute;
+        width: 100%;
+        bottom: 0;
         left: 0;
         right: 0;
-        bottom: 0;
-        top: auto;
-        width: 100%;
         transform: none !important;
-        justify-content: flex-end;
+      }
+      .planet-card {
+        border-radius: 24px 24px 0 0;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+        padding: 20px 24px 24px 24px;
+      }
+      .planet-card.minimized {
+        transform: translateY(calc(100% - 68px));
       }
       .specs-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -797,45 +765,31 @@
       .help-body {
         grid-template-columns: 1fr;
       }
-      .planet-card {
-        padding: 16px 20px;
-        max-height: 48vh;
-        border-radius: 24px 24px 0 0;
-        border-left: none;
-        border-right: none;
-        border-bottom: none;
-        transform: translateY(100%); /* Slide from absolute bottom */
-      }
-      .planet-card.active {
-        transform: translateY(0);
-      }
-      .planet-desc {
-        max-height: 90px;
-      }
       .status-panel {
-        position: absolute;
         top: 74px;
-        right: 12px;
-        left: auto;
-        bottom: auto;
-        width: auto;
-        min-width: 160px;
-        padding: 8px 14px;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-      }
-      .marker-grid {
-        grid-template-columns: 1fr !important;
-        gap: 8px;
+        right: 16px;
+        min-width: 150px;
+        padding: 10px 14px;
       }
       .intro-card {
-        padding: 24px 16px;
-        border-radius: 16px;
+        padding: 32px 24px;
+        border-radius: 24px;
       }
       .intro-title {
-        font-size: 20px;
+        font-size: 24px;
+      }
+      .header-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .controls-panel {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .btn-pill {
+        padding: 6px 12px;
+        font-size: 11px;
       }
     }
   </style>
@@ -848,82 +802,51 @@
     <div class="intro-card">
       <div class="intro-logo-wrapper">
         <svg class="intro-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Star glow -->
-          <circle cx="50" cy="50" r="16" fill="url(#starGlow)" />
-          <!-- Sun/Central Star -->
-          <circle cx="50" cy="50" r="6" fill="#ffffff" />
-          <!-- Orbit 1 (Inner) -->
-          <ellipse cx="50" cy="50" rx="20" ry="8" stroke="rgba(0, 240, 255, 0.4)" stroke-width="1.5" transform="rotate(-15 50 50)" />
-          <!-- Planet on Orbit 1 -->
-          <circle cx="33" cy="45" r="3" fill="var(--primary)" />
-          <!-- Orbit 2 (Outer) -->
-          <ellipse cx="50" cy="50" rx="38" ry="16" stroke="rgba(189, 0, 255, 0.3)" stroke-width="1.5" transform="rotate(20 50 50)" stroke-dasharray="4 4" />
-          <!-- Planet on Orbit 2 -->
-          <circle cx="75" cy="59" r="4.5" fill="var(--secondary)" />
+          <!-- Elegant Cosmic Ring Icon -->
+          <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.05)" stroke-width="1.5" />
+          <circle cx="50" cy="50" r="28" stroke="rgba(99, 102, 241, 0.15)" stroke-width="1" />
+          <ellipse cx="50" cy="50" rx="36" ry="12" stroke="url(#indigoGrad)" stroke-width="2" transform="rotate(-30 50 50)" />
+          <circle cx="50" cy="50" r="10" fill="url(#coreGrad)" />
+          <!-- Small planet on orbit -->
+          <circle cx="76" cy="35" r="4.5" fill="#818cf8" />
           <defs>
-            <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.6"/>
-              <stop offset="100%" stop-color="var(--primary)" stop-opacity="0"/>
+            <linearGradient id="indigoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#6366f1" />
+              <stop offset="100%" stop-color="#ec4899" />
+            </linearGradient>
+            <radialGradient id="coreGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffffff" />
+              <stop offset="100%" stop-color="#6366f1" />
             </radialGradient>
           </defs>
         </svg>
       </div>
 
-      <h1 class="intro-title">Solar System AR</h1>
+      <h1 class="intro-title">Solaris AR</h1>
       <p class="intro-desc">
-        Jelajahi keindahan tata surya secara interaktif langsung di ruang Anda. Arahkan kamera perangkat ke penanda cetak untuk memproyeksikan visualisasi planet 3D dengan detail orbit yang presisi.
+        Jelajahi keindahan tata surya secara interaktif langsung di ruang Anda. Proyeksikan visualisasi planet 3D dengan detail orbit presisi dan data ilmiah terintegrasi.
       </p>
 
       <div class="marker-guide">
-        <h2 class="guide-heading">Panduan Target Pindai (6 Objek Kosmik)</h2>
-        <div class="marker-grid">
-          <div class="marker-card">
-            <div class="marker-header">
-              <span class="marker-code">Hiro</span>
-              <span class="marker-planet-tag">Bumi</span>
-            </div>
-            <div class="marker-info">Bumi &amp; Bulan (Orbit Dinamis)</div>
+        <h2 class="guide-heading">Cara Memulai Pemindaian</h2>
+        <div class="steps-container">
+          <div class="step-item-guide">
+            <div class="step-num">1</div>
+            <div class="step-text">Siapkan penanda AR (marker) dari tombol <strong>Panduan</strong> di pojok atas layar.</div>
           </div>
-          <div class="marker-card">
-            <div class="marker-header">
-              <span class="marker-code">Kanji</span>
-              <span class="marker-planet-tag">Mars</span>
-            </div>
-            <div class="marker-info">Mars &amp; Dua Satelit Alami</div>
+          <div class="step-item-guide">
+            <div class="step-num">2</div>
+            <div class="step-text">Arahkan kamera perangkat Anda langsung ke penanda tersebut (bisa dicetak atau ditampilkan di layar lain).</div>
           </div>
-          <div class="marker-card">
-            <div class="marker-header">
-              <span class="marker-code">Barcode 0</span>
-              <span class="marker-planet-tag">Jupiter</span>
-            </div>
-            <div class="marker-info">Raksasa Gas &amp; Sistem Cincin</div>
-          </div>
-          <div class="marker-card">
-            <div class="marker-header">
-              <span class="marker-code">Barcode 1</span>
-              <span class="marker-planet-tag">Saturnus</span>
-            </div>
-            <div class="marker-info">Sistem Cincin Es Raksasa Megah</div>
-          </div>
-          <div class="marker-card">
-            <div class="marker-header">
-              <span class="marker-code">Barcode 2</span>
-              <span class="marker-planet-tag">Matahari</span>
-            </div>
-            <div class="marker-info">Inti Bintang &amp; Korona Pijar</div>
-          </div>
-          <div class="marker-card">
-            <div class="marker-header">
-              <span class="marker-code">Barcode 3</span>
-              <span class="marker-planet-tag">Venus</span>
-            </div>
-            <div class="marker-info">Kembaran Bumi &amp; Efek Gas Ekstrem</div>
+          <div class="step-item-guide">
+            <div class="step-num">3</div>
+            <div class="step-text">Pelajari fakta menarik, orbit dinamis, dan spesifikasi detail planet dalam representasi 3D.</div>
           </div>
         </div>
       </div>
 
       <button class="btn-start" onclick="startScanner()">
-        <span>Mulai Memindai</span>
+        <span>Mulai Eksplorasi</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 2px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
       </button>
     </div>
@@ -982,34 +905,36 @@
     </div>
   </div>
 
-  <!-- ================= Sci-Fi Overlay & Interactive UI ================= -->
-  <div class="hud-overlay" id="hudOverlay">
-    <div class="corner top-left"></div>
-    <div class="corner top-right"></div>
-    <div class="corner bottom-left"></div>
-    <div class="corner bottom-right"></div>
-  </div>
-
+  <!-- ================= Interactive UI ================= -->
   <div class="interactive-ui">
     <!-- Header -->
     <div class="header-bar">
       <div class="logo-container">
         <div class="pulse-dot"></div>
-        <div class="logo-text">AR Cosmic Scanner</div>
+        <div class="logo-text">Solaris AR</div>
       </div>
       <div class="controls-panel">
-        <button class="btn-hud" onclick="toggleHelpModal(); playClick();">📖 Panduan</button>
-        <button class="btn-hud" onclick="toggleRotation(); playClick();">🔄 Putar: ON</button>
-        <button class="btn-hud" onclick="toggleSpeed(); playClick();">⚡ Fast Mode</button>
+        <button class="btn-pill" onclick="toggleHelpModal(); playClick();">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          <span>Panduan</span>
+        </button>
+        <button class="btn-pill" id="btn-rotation" onclick="toggleRotation(); playClick();">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+          <span>Rotasi: ON</span>
+        </button>
+        <button class="btn-pill" id="btn-speed" onclick="toggleSpeed(); playClick();">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          <span>Fast Mode</span>
+        </button>
       </div>
     </div>
 
     <!-- Active Scanner Status -->
     <div class="status-panel">
-      <div class="status-title">Status Deteksi</div>
+      <div class="status-title">Status Pemindaian</div>
       <div class="status-value" id="scannerStatus">
-        <div class="scanner-radar"></div>
-        <span>MENCARI MARKER...</span>
+        <div class="status-dot"></div>
+        <span>MENCARI PENANDA...</span>
       </div>
     </div>
 
@@ -1018,6 +943,7 @@
       
       <!-- Earth Card -->
       <div class="planet-card" id="card-earth">
+        <div class="drag-handle"></div>
         <div class="planet-header" onclick="toggleMinimize(event)">
           <div style="display: flex; align-items: baseline; gap: 10px;">
             <div class="planet-title">Bumi (Earth)</div>
@@ -1050,6 +976,7 @@
 
       <!-- Mars Card -->
       <div class="planet-card" id="card-mars">
+        <div class="drag-handle"></div>
         <div class="planet-header" onclick="toggleMinimize(event)">
           <div style="display: flex; align-items: baseline; gap: 10px;">
             <div class="planet-title">Mars</div>
@@ -1082,6 +1009,7 @@
 
       <!-- Jupiter Card -->
       <div class="planet-card" id="card-jupiter">
+        <div class="drag-handle"></div>
         <div class="planet-header" onclick="toggleMinimize(event)">
           <div style="display: flex; align-items: baseline; gap: 10px;">
             <div class="planet-title">Jupiter</div>
@@ -1114,6 +1042,7 @@
 
       <!-- Saturnus Card -->
       <div class="planet-card" id="card-saturn">
+        <div class="drag-handle"></div>
         <div class="planet-header" onclick="toggleMinimize(event)">
           <div style="display: flex; align-items: baseline; gap: 10px;">
             <div class="planet-title">Saturnus (Saturn)</div>
@@ -1146,6 +1075,7 @@
 
       <!-- Matahari Card -->
       <div class="planet-card" id="card-sun">
+        <div class="drag-handle"></div>
         <div class="planet-header" onclick="toggleMinimize(event)">
           <div style="display: flex; align-items: baseline; gap: 10px;">
             <div class="planet-title">Matahari (Sun)</div>
@@ -1178,6 +1108,7 @@
 
       <!-- Venus Card -->
       <div class="planet-card" id="card-venus">
+        <div class="drag-handle"></div>
         <div class="planet-header" onclick="toggleMinimize(event)">
           <div style="display: flex; align-items: baseline; gap: 10px;">
             <div class="planet-title">Venus</div>
@@ -1209,6 +1140,7 @@
       </div>
 
     </div>
+
   </div>
 
   <!-- ================= 3D A-Scene ================= -->
@@ -1453,7 +1385,7 @@
     // Toggle Planet Spheres Rotation Play/Pause
     function toggleRotation() {
       isRotationOn = !isRotationOn;
-      const btn = document.querySelector('button[onclick*="toggleRotation"]');
+      const btnSpan = document.querySelector('#btn-rotation span');
       
       const planets = ['earth-mesh', 'mars-mesh', 'jupiter-mesh', 'saturn-mesh', 'sun-mesh', 'venus-mesh'];
       
@@ -1487,13 +1419,13 @@
         }
       });
       
-      btn.innerText = isRotationOn ? '🔄 Putar: ON' : '⏸️ Putar: OFF';
+      if (btnSpan) btnSpan.innerText = isRotationOn ? 'Rotasi: ON' : 'Rotasi: OFF';
     }
 
     // Adjust Rotational Speed Factor
     function toggleSpeed() {
       isSpeedFast = !isSpeedFast;
-      const btn = document.querySelector('button[onclick*="toggleSpeed"]');
+      const btnSpan = document.querySelector('#btn-speed span');
       
       const configs = [
         { id: 'earth-mesh', normal: 12000, fast: 2000 },
@@ -1511,9 +1443,13 @@
         }
       });
 
-      btn.innerText = isSpeedFast ? '⚡ Fast Mode' : '🐌 Slow Mode';
-      btn.style.color = isSpeedFast ? 'var(--secondary)' : 'var(--primary)';
-      btn.style.borderColor = isSpeedFast ? 'var(--secondary)' : 'var(--border-glass)';
+      if (btnSpan) btnSpan.innerText = isSpeedFast ? 'Fast Mode' : 'Slow Mode';
+      const btn = document.getElementById('btn-speed');
+      if (btn) {
+        btn.style.color = isSpeedFast ? 'var(--primary-light)' : 'var(--text)';
+        btn.style.borderColor = isSpeedFast ? 'var(--primary-light)' : 'var(--border-subtle)';
+        btn.style.background = isSpeedFast ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255, 255, 255, 0.05)';
+      }
     }
 
 
